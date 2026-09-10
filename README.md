@@ -1,73 +1,72 @@
-# 📦 Dast-E-Yaar — Enterprise Direct-to-Patient Pharmaceutical Logistics Engine
+# Dast-E-Yaar — Pharmaceutical Fulfillment & WhatsApp Routing Engine
 
-[![Framework: Express 5](https://img.shields.io/badge/Backend-Express_5_(Node.js)-000000?style=for-the-badge&logo=express&logoColor=white)]()
-[![Language: TypeScript](https://img.shields.io/badge/Language-TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)]()
-[![Integration: Shopify API](https://img.shields.io/badge/API-Shopify_REST_%26_GraphQL-96BF48?style=for-the-badge&logo=shopify&logoColor=white)]()
-[![Client: CCL Pharmaceuticals](https://img.shields.io/badge/Client-CCL_Pharmaceuticals-blue?style=for-the-badge)]()
-[![Type: Case Study](https://img.shields.io/badge/Type-Systems_Architecture_Case_Study-blueviolet?style=for-the-badge)]()
+[![Client: CCL Pharmaceuticals](https://img.shields.io/badge/Client-CCL_Pharmaceuticals-blue?style=flat-square)]()
+[![Partner: Softsols Pakistan](https://img.shields.io/badge/Partner-Softsols_Pakistan-slate?style=flat-square)]()
+[![Platform: Node.js & Express 5](https://img.shields.io/badge/Backend-Node.js_%2F_Express_5-green?style=flat-square)]()
+[![Integration: Shopify & WhatsApp](https://img.shields.io/badge/Integrations-Shopify_REST_%2F_WhatsApp-teal?style=flat-square)]()
+[![Type: Case Study](https://img.shields.io/badge/Type-Enterprise_Case_Study-purple?style=flat-square)]()
 
-> **Enterprise Notice & Commercial Disclaimer**:  
-> Engineered for **CCL Pharmaceuticals** (a premier multinational pharmaceutical manufacturer in Pakistan) via **Softsols Pakistan**.  
-> Production database schemas, commercial client API credentials, and internal logistics infrastructure are protected under corporate NDA. This repository documents the systems architecture, clinic-to-patient order fulfillment automation, and idempotent webhook synchronization design.
+Systems architecture and engineering case study for **Dast-E-Yaar**, an automated direct-to-patient medication fulfillment pipeline engineered for **CCL Pharmaceuticals** via Softsols Pakistan.
 
 ---
 
-## 🏛️ Executive Summary & Workflow Pipeline
+## Role & Individual Ownership
 
-In traditional pharmaceutical distribution, patients visiting specialist clinics receive paper prescriptions, face counterfeit medication risks at retail pharmacies, and endure stock-out delays for critical medications. 
+* **Role:** Sole Architect & Backend Lead
+* **Context:** Built under Softsols Pakistan for CCL Pharmaceuticals. Engineered the system from ground up.
+* **Scope of Ownership:** Clinical intake workflow, webhook integration, Shopify REST Admin API automated ordering, and WhatsApp Business dispatch pipeline.
 
-**Dast-E-Yaar** was engineered for **CCL Pharmaceuticals** to establish a direct, automated fulfillment pipeline linking clinical consulting rooms directly to CCL Pharma's central distribution warehouses.
+---
+
+## Architecture Pipeline
 
 ```mermaid
-sequenceDiagram
-    autonumber
-    actor Clinic as Medical Assistant / Clinic
-    participant Backend as Dast-E-Yaar Express 5 Engine
-    participant WhatsApp as Patient WhatsApp Notification Gateway
-    actor Patient as Patient / Recipient
-    participant Shopify as Shopify Fulfillment Backbone
-    actor Warehouse as CCL Central Warehouse Dispatch
+flowchart TD
+    subgraph Clinic Intake [Doctor & Assistant Console]
+        ASSIST[Doctor's Assistant Intake]
+        PRESC[Prescription Item Selection]
+        SAVE[Save Patient Record]
+        ASSIST --> PRESC --> SAVE
+    end
 
-    Clinic->>Backend: Enters Patient Record + Uploads Validated Prescription
-    Backend->>Backend: Validates Schema (Joi) & Sanitizes Data (Helmet/Mongo-Sanitize)
-    Backend->>WhatsApp: Dispatches Order Summary & Address Confirmation Ping
-    Patient-->>WhatsApp: Confirms Delivery Address & Payment Method
-    Backend->>Shopify: Injects Programmatic Order via GraphQL/REST API
-    Shopify-->>Backend: Emits HMAC-Signed Order Creation Webhook
-    Backend->>Backend: Idempotent Lock Check & Winston Audit Log
-    Shopify->>Warehouse: Automatic Pick & Pack Ticket Generated
-    Warehouse->>Patient: Dispatches Genuine Medication Directly to Doorstep
+    subgraph Fulfillment Engine [Express 5 & Node.js Core]
+        VAL[Prescription Validation & Stock Match]
+        WA[WhatsApp Notification Dispatcher]
+        SHOPIFY[Shopify Order Creator API]
+        SAVE --> VAL
+        VAL --> WA
+        VAL --> SHOPIFY
+    end
+
+    subgraph Fulfillment & Delivery
+        PATIENT[Patient Receives WhatsApp Confirmation]
+        CCL[CCL Pharma Central Warehouse]
+        DISPATCH[Direct-to-Door Courier Delivery]
+        WA --> PATIENT
+        SHOPIFY --> CCL --> DISPATCH
+    end
 ```
 
 ---
 
-## 🛠️ Core Engineering Subsystems
+## Core Technical Highlights
 
-### 1. High-Reliability Express 5 & TypeScript Architecture
-* **Strict Static Typing:** Eliminates runtime null-pointer exceptions in mission-critical medical order states.
-* **Defensive Security Stack:** Multi-layer middleware including `helmet` for HTTP response hardening, `express-mongo-sanitize` for NoSQL injection neutralization, and `joi` for strict request body schema validation.
-* **Production Observability:** Structured logging via **Winston** with daily log rotation and separated error vs. audit transport streams.
-
-### 2. Idempotent Shopify Webhook Bridge (`@shopify/shopify-api`)
-* **The Problem:** High-concurrency network spikes and webhook retries from Shopify can trigger duplicate pharmaceutical orders or conflicting dispatch tickets.
-* **The Solution:** Built an idempotent webhook consumer that verifies Shopify cryptographic **HMAC-SHA256 signatures** and performs atomic database transaction locks on order status fields before executing mutations.
-
-### 3. Asynchronous Clinic-to-Patient Coordination
-* Direct integration connecting doctor assistants' prescription entry forms to asynchronous notification gateways, ensuring patients receive verified dosage instructions and delivery tracking without manual phone calls.
+* **Clinical Order Pipeline:** Doctor's assistant inputs patient demographics and verifies prescription items; saving the record triggers synchronous order validation against the pharmaceutical SKU catalog.
+* **Automated WhatsApp Confirmation:** Dispatches real-time WhatsApp verification messages to the patient containing order summaries, delivery tracking, and dosage instructions via WhatsApp Business API webhooks.
+* **Shopify REST API Order Creation:** Programmatically synthesizes verified orders into CCL Pharma's Shopify backend, attaching shipping addresses, billing tags, and delivery timeframes for warehouse dispatch.
+* **Direct-to-Door Logistics:** Eliminates retail intermediary delays by dispatching genuine medications directly from CCL Pharma's central supply chain to patient residences.
 
 ---
 
-## 📁 Repository Structure
+## Tech Stack
 
-```
-dasteyaar-pharma-logistics/
-├── snippets/
-│   └── shopify-idempotent-webhook.ts  # Cryptographic HMAC verification & order mutation lock
-├── README.md                          # Master architectural whitepaper
-└── LICENSE                            # MIT License
-```
+* **Backend:** Node.js, Express 5 REST API
+* **Database:** MongoDB
+* **APIs & Webhooks:** Shopify REST Admin API, WhatsApp Business API
+* **Deployment:** Secure cloud container instance
 
 ---
 
-## 📄 License
-This case study is published under the [MIT License](LICENSE).
+## Notice
+
+Proprietary patient prescription records, pharmaceutical formulations, and commercial enterprise endpoints belong to CCL Pharmaceuticals and Softsols Pakistan. This repository documents software architecture and integration specifications.
